@@ -1,0 +1,51 @@
+<div>
+  <mat-card>
+    <mat-card-title>List of Contributors</mat-card-title>
+    <mat-card-content>
+      <table [dataSource]="dataSource" mat-table matSort matSortActive="commits" matSortDirection="desc"
+             matSortDisableClear>
+        <!-- Name Column -->
+        <ng-container matColumnDef="name">
+          <th *matHeaderCellDef mat-header-cell mat-sort-header> Name</th>
+          <td *matCellDef="let element"
+              mat-cell> {{element.person.name}} </td>
+        </ng-container>
+
+        <!-- Team Column -->
+        <ng-container matColumnDef="teamName">
+          <th *matHeaderCellDef mat-header-cell mat-sort-header> Team</th>
+          <td *matCellDef="let element" mat-cell> {{element.teamName}} </td>
+        </ng-container>
+
+        <!-- Commits Column -->
+        <ng-container matColumnDef="commits">
+          <th *matHeaderCellDef mat-header-cell mat-sort-header> Commits</th>
+          <td *matCellDef="let element" mat-cell> {{element.commits}} </td>
+        </ng-container>
+
+        <!-- Symbol Column -->
+        <ng-container matColumnDef="reviews">
+          <th *matHeaderCellDef mat-header-cell mat-sort-header> Reviews</th>
+          <td *matCellDef="let element" mat-cell> {{element.reviews}} </td>
+        </ng-container>
+
+        <tr *matHeaderRowDef="displayedColumns" mat-header-row></tr>
+        <tr *matRowDef="let row; columns: displayedColumns;" mat-row></tr>
+      </table>
+
+      <mat-paginator [pageSizeOptions]="[5, 10, 20, 50]" pageSize="10" showFirstLastButtons></mat-paginator>
+    </mat-card-content>
+  </mat-card>
+  <mat-card>
+    <mat-card-title>Commits</mat-card-title>
+    <mat-card-content>{{numberOfCommits}}</mat-card-content>
+  </mat-card>
+  <mat-card>
+    <mat-card-title>Contributors</mat-card-title>
+    <mat-card-content>{{numberOfContributors}}</mat-card-content>
+  </mat-card>
+  <mat-card>
+    <mat-card-title>Most busy day</mat-card-title>
+    <mat-card-content>{{mostBusyDay.date}}<br>{{mostBusyDay.count}} Commits</mat-card-content>
+  </mat-card>
+</div>

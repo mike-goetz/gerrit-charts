@@ -1,0 +1,78 @@
+<div class="wrapper">
+  <mat-expansion-panel expanded="true">
+    <mat-expansion-panel-header>
+      <mat-panel-title>
+        Project Filter
+      </mat-panel-title>
+      <mat-panel-description>
+        Define the scope of all related charts
+      </mat-panel-description>
+    </mat-expansion-panel-header>
+    <div class="projectFilter">
+      <mat-form-field class="filterInput">
+        <mat-label>Filter</mat-label>
+        <input (keyup)="applyFilter($event)" matInput placeholder="Filter...">
+      </mat-form-field>
+      <table [dataSource]="dataSource" mat-table matSort matSortActive="commits" matSortDirection="desc"
+             matSortDisableClear>
+
+        <!-- Checkbox Column -->
+        <ng-container matColumnDef="select">
+          <th *matHeaderCellDef mat-header-cell>
+            <mat-checkbox (change)="$event ? masterToggle() : null"
+                          [aria-label]="checkboxLabel()"
+                          [checked]="selection.hasValue() && isAllSelected()"
+                          [indeterminate]="selection.hasValue() && !isAllSelected()">
+            </mat-checkbox>
+          </th>
+          <td *matCellDef="let row" mat-cell>
+            <mat-checkbox (change)="$event ? selection.toggle(row) : null"
+                          (click)="$event.stopPropagation()"
+                          [aria-label]="checkboxLabel(row)"
+                          [checked]="isRowSelected(row)">
+            </mat-checkbox>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="project">
+          <th *matHeaderCellDef mat-header-cell mat-sort-header> Project</th>
+          <td *matCellDef="let element" mat-cell> {{element.project}} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="commits">
+          <th *matHeaderCellDef mat-header-cell mat-sort-header> Commits</th>
+          <td *matCellDef="let element" mat-cell> {{element.commits}} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="contributors">
+          <th *matHeaderCellDef mat-header-cell mat-sort-header> Contributors</th>
+          <td *matCellDef="let element" mat-cell> {{element.contributors}} </td>
+        </ng-container>
+
+        <tr *matHeaderRowDef="displayedColumns" mat-header-row></tr>
+        <tr (click)="selection.toggle(row)" *matRowDef="let row; columns: displayedColumns;"
+            mat-row>
+        </tr>
+      </table>
+
+      <mat-paginator [pageSizeOptions]="[5, 10, 20, 50]" pageSize="10" showFirstLastButtons></mat-paginator>
+    </div>
+  </mat-expansion-panel>
+
+  <mat-card *ngIf="!selection.isEmpty()">
+    <mat-tab-group>
+      <mat-tab label="Overview">
+        <ng-template matTabContent>
+          <app-gerrit-overview></app-gerrit-overview>
+        </ng-template>
+      </mat-tab>
+      <mat-tab *ngFor="let team of teams;" [label]="team.name">
+        <ng-template matTabContent>
+          <app-team-commit-overview [team]="team"></app-team-commit-overview>
+          <app-user-contribution-chart *ngFor="let person of team.members;" [person]="person"
+                                       [team]="team"></app-user-contribution-chart>
+        </ng-template>
+      </mat-tab>
+    </mat-tab-group>
+  </mat-card>
+</div>

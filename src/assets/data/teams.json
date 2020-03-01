@@ -1,0 +1,66 @@
+[
+  {
+    "name": "Avengers",
+    "members": [
+      {
+        "username": "t.allan",
+        "name": "Tim Allan",
+        "email": "t.allan@example.com",
+        "startDate": "2018-08-01T00:00:00.000Z"
+      },
+      {
+        "username": "n.hansen",
+        "name": "Norman Hansen",
+        "email": "n.hansen@example.com",
+        "startDate": "2018-08-01T00:00:00.000Z"
+      },
+      {
+        "username": "s.clark",
+        "name": "Stefanie Clark",
+        "email": "s.clark@example.com",
+        "startDate": "2018-08-01T00:00:00.000Z"
+      },
+      {
+        "username": "v.sutter",
+        "name": "Verena Sutter",
+        "email": "v.sutter@example.com",
+        "startDate": "2018-08-01T00:00:00.000Z"
+      },
+      {
+        "username": "r.ramanov",
+        "name": "Reggie Ramanov",
+        "email": "r.ramanov@example.com",
+        "startDate": "2018-08-01T00:00:00.000Z"
+      }
+    ]
+  },
+  {
+    "name": "Guardians",
+    "members": [
+      {
+        "username": "m.johnson",
+        "name": "Michael Johnson",
+        "email": "m.johnson@example.com",
+        "startDate": "2016-02-01T00:00:00.000Z"
+      },
+      {
+        "username": "s.miller",
+        "name": "Steve Miller",
+        "email": "s.miller@example.com",
+        "startDate": "2016-02-01T00:00:00.000Z"
+      },
+      {
+        "username": "a.wullinger",
+        "name": "Andreas Wullinger",
+        "email": "a.wullinger@example.com",
+        "startDate": "2016-02-01T00:00:00.000Z"
+      },
+      {
+        "username": "n.prang",
+        "name": "Nik Prang",
+        "email": "n.prang@example.com",
+        "startDate": "2016-02-01T00:00:00.000Z"
+      }
+    ]
+  }
+]
