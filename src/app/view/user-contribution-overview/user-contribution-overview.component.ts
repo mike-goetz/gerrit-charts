@@ -1,7 +1,5 @@
-import {AfterViewInit, Component, ElementRef, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {Team} from '../../model/team';
-import {Label} from 'ng2-charts';
-import {Chart, ChartDataSets, ChartOptions} from 'chart.js';
+import {AfterViewInit, Component, ElementRef, Input, OnDestroy, ViewChild} from '@angular/core';
+import {Chart, ChartDataSets} from 'chart.js';
 import {Subject, Subscription} from 'rxjs';
 import {GerritService} from '../../service/gerrit.service';
 import {Person} from '../../model/person';
@@ -14,6 +12,7 @@ import {Person} from '../../model/person';
 export class UserContributionOverviewComponent implements AfterViewInit, OnDestroy {
   @Input() persons: Subject<Person[]> = new Subject<Person[]>();
   @ViewChild('userCommitChart') userCommitChart: ElementRef;
+  private chart: Chart;
   private subscriptions: Subscription[] = [];
 
   constructor(private gerritService: GerritService) {
@@ -48,7 +47,10 @@ export class UserContributionOverviewComponent implements AfterViewInit, OnDestr
       };
       datasets.push(dataSet);
     });
-    new Chart(this.userCommitChart.nativeElement, {
+    if (this.chart) {
+      this.chart.destroy();
+    }
+    this.chart = new Chart(this.userCommitChart.nativeElement, {
       type: 'line',
       data: {
         datasets
