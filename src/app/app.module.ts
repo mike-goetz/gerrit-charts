@@ -5,9 +5,9 @@ import {MatCheckboxModule} from '@angular/material/checkbox';
 import {MatExpansionModule} from '@angular/material/expansion';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatInputModule} from '@angular/material/input';
-import {MatPaginatorModule} from "@angular/material/paginator";
-import {MatSortModule} from "@angular/material/sort";
-import {MatTableModule} from "@angular/material/table";
+import {MatPaginatorModule} from '@angular/material/paginator';
+import {MatSortModule} from '@angular/material/sort';
+import {MatTableModule} from '@angular/material/table';
 import {MatTabsModule} from '@angular/material/tabs';
 import {MatToolbarModule} from '@angular/material/toolbar';
 import {BrowserModule} from '@angular/platform-browser';
@@ -20,6 +20,8 @@ import {GerritDashboardComponent} from './view/gerrit-dashboard/gerrit-dashboard
 import {GerritOverviewComponent} from './view/gerrit-overview/gerrit-overview.component';
 import {TeamCommitOverviewComponent} from './view/team-commit-overview/team-commit-overview.component';
 import {UserContributionChartComponent} from './view/user-contribution-chart/user-contribution-chart.component';
+import {UserContributionOverviewComponent} from './view/user-contribution-overview/user-contribution-overview.component';
+import {ReactiveFormsModule} from '@angular/forms';
 
 @NgModule({
   declarations: [
@@ -28,9 +30,11 @@ import {UserContributionChartComponent} from './view/user-contribution-chart/use
     UserContributionChartComponent,
     TeamCommitOverviewComponent,
     GerritOverviewComponent,
+    UserContributionOverviewComponent,
   ],
   imports: [
     BrowserModule,
+    ReactiveFormsModule,
     AppRoutingModule,
     BrowserAnimationsModule,
     MatCardModule,

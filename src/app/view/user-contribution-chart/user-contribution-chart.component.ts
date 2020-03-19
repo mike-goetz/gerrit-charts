@@ -27,7 +27,7 @@ export class UserContributionChartComponent implements AfterViewInit, OnDestroy 
   }
 
   ngAfterViewInit(): void {
-    this.subscription = this.gerritService.filter$.subscribe(() => {
+    this.subscription = this.gerritService.filter$.subscribe((filter) => {
       const analyticsData: GerritAnalyticsData = this.gerritService.getPersonData(this.person, this.team);
 
       let dataSet = {
@@ -61,7 +61,7 @@ export class UserContributionChartComponent implements AfterViewInit, OnDestroy 
         },
         width(ctx: MatrixChartContext) {
           const a = ctx.chart.chartArea;
-          return (a.right - a.left) / 60;
+          return (a.right - a.left) / (filter.numberOfDays / 365 * 60);
         }
       };
       new Chart(this.matrixChart.nativeElement, {

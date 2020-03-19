@@ -27,9 +27,9 @@ export interface ListOfProjectsEntry {
 export class GerritService {
 
   private readonly _filter = new BehaviorSubject<{ numberOfDays: number, summarizeCommits: boolean, projects: string[] }>({
-    numberOfDays: 365,
+    numberOfDays: 0,
     summarizeCommits: true,
-    projects: ['gerald/*']
+    projects: []
   });
   readonly filter$ = this._filter.asObservable();
 
@@ -44,6 +44,13 @@ export class GerritService {
     this._filter.next(val);
   }
 
+  updateDaysFilter(numberOfDays: number) {
+    this.filter = {
+      ...this._filter.getValue(),
+      numberOfDays
+    };
+  }
+
   updateProjectsFilter(projects: string[]) {
     this.filter = {
       ...this._filter.getValue(),
@@ -54,7 +61,7 @@ export class GerritService {
   public getProjects(): ListOfProjectsEntry[] {
     const map = new Map<string, { commits: number, contributors: Map<string, number> }>();
 
-    gerritData.forEach(item => {
+    gerritData.filter(item => this.isWithinDateScope(item)).forEach(item => {
       const key = item.project;
       const object = map.has(key) ? map.get(key) : {commits: 0, contributors: new Map<string, number>()};
       object.commits += 1;
@@ -151,6 +158,52 @@ export class GerritService {
     };
   }
 
+  public getPersonsData(persons: Person[] = []): Map<Person, Map<string, number>> {
+    if (persons.length === 0) {
+      this.getContributors().forEach(value => persons.push(value.person));
+    }
+
+    const map = new Map<Person, Map<string, number>>();
+    let dt = moment().subtract(this.filter.numberOfDays - 1, 'days').startOf('day');
+    const end = moment().startOf('day');
+    persons.forEach(person => {
+      const personMap = new Map<string, number>();
+
+      dt = moment().subtract(this.filter.numberOfDays - 1, 'days').startOf('day');
+      while (dt <= end) {
+        const date = dt.format('YYYY-MM-DD');
+        personMap.set(date, 0);
+        dt = dt.add(1, 'day');
+      }
+      map.set(person, personMap);
+    });
+
+    gerritData.filter(item => this.isWithinScope(item)).forEach(item => {
+      const contributionDate = moment(item.submitted, 'YYYY-MM-DD HH:mm:ss.SSS');
+      const person = persons.find(m => m.username === item.owner.username);
+      if (person) {
+        const personMap = map.get(person);
+        const key = contributionDate.format('YYYY-MM-DD');
+        const newCountValue = personMap.get(key) + 1;
+        personMap.set(key, newCountValue);
+      }
+    });
+    if (this.filter.summarizeCommits) {
+      persons.forEach(person => {
+        const personMap = map.get(person);
+        dt = moment().subtract(this.filter.numberOfDays - 1, 'days').startOf('day');
+        let continuesCommitCount = 0;
+        while (dt <= end) {
+          const date = dt.format('YYYY-MM-DD');
+          continuesCommitCount += personMap.get(date);
+          personMap.set(date, continuesCommitCount);
+          dt = dt.add(1, 'day');
+        }
+      });
+    }
+    return map;
+  }
+
   public getTeamData(team: Team): Map<Person, Map<string, number>> {
     const map = new Map<Person, Map<string, number>>();
     let dt = moment().subtract(this.filter.numberOfDays - 1, 'days').startOf('day');
@@ -207,9 +260,13 @@ export class GerritService {
       }
       // exclude reviews done by owner
       if (codeReviewer !== undefined && owner.username !== codeReviewer.username) {
-        const userStatistic = map.has(codeReviewer.username) ? map.get(codeReviewer.username) : {person: codeReviewer, commits: 0, reviews: 0};
-        userStatistic.reviews = userStatistic.reviews + 1;
-        map.set(codeReviewer.username, userStatistic);
+        const userStatisticCodeReviewer = map.has(codeReviewer.username) ? map.get(codeReviewer.username) : {
+          person: codeReviewer,
+          commits: 0,
+          reviews: 0
+        };
+        userStatisticCodeReviewer.reviews = userStatisticCodeReviewer.reviews + 1;
+        map.set(codeReviewer.username, userStatisticCodeReviewer);
       }
     });
 
@@ -254,14 +311,15 @@ export class GerritService {
     return result.values().next().value;
   }
 
+  private isWithinDateScope(item): boolean {
+    const dt = moment().subtract(this.filter.numberOfDays - 1, 'days').startOf('day');
+    return moment(item.submitted, 'YYYY-MM-DD HH:mm:ss.SSS').isBetween(dt, undefined);
+  }
+
   private isWithinScope(item): boolean {
     const projects: string[] = this.filter.projects;
     const dt = moment().subtract(this.filter.numberOfDays - 1, 'days').startOf('day');
-    if (projects.length == 1 && projects[0].endsWith('*')) {
-      return item.project.startsWith(projects[0].substring(0, projects[0].length - 1)) && moment(item.submitted, 'YYYY-MM-DD HH:mm:ss.SSS').isBetween(dt, undefined);
-    }
     return projects.includes(item.project) && moment(item.submitted, 'YYYY-MM-DD HH:mm:ss.SSS').isBetween(dt, undefined);
-    // return moment(item.submitted, 'YYYY-MM-DD HH:mm:ss.SSS').isBetween(dt, undefined);
   }
 
   private isTeamMember(username: string, team: Team): boolean {

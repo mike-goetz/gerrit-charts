@@ -7,6 +7,7 @@ import {Subscription} from 'rxjs';
 import {Team} from '../../model/team';
 import {GerritService, ListOfProjectsEntry} from '../../service/gerrit.service';
 import {MasterDataService} from '../../service/master-data.service';
+import {FormControl, Validators} from '@angular/forms';
 
 @Component({
   selector: 'app-gerrit-dashboard',
@@ -14,6 +15,10 @@ import {MasterDataService} from '../../service/master-data.service';
   styleUrls: ['./gerrit-dashboard.component.scss']
 })
 export class GerritDashboardComponent implements OnInit, OnDestroy {
+  numberOfDays = new FormControl({value: 365, disabled: false}, [
+    Validators.required,
+    Validators.pattern('[1-9][0-9]*')
+  ]);
 
   teams: Team[] = undefined;
   displayedColumns: string[] = ['select', 'project', 'commits', 'contributors'];
@@ -23,6 +28,9 @@ export class GerritDashboardComponent implements OnInit, OnDestroy {
   selection = new SelectionModel<ListOfProjectsEntry>(true, []);
   @Output() updateFilter = new EventEmitter<string[]>();
   private subscriptions: Subscription[] = [];
+
+  previousNumberOfDays: number;
+  scopeChangeOngoing: boolean;
 
   constructor(private gerritService: GerritService, private masterDataService: MasterDataService) {
   }
@@ -62,19 +70,42 @@ export class GerritDashboardComponent implements OnInit, OnDestroy {
     return `${this.selection.isSelected(row) ? 'deselect' : 'select'} project ${row.project}`;
   }
 
+  updateNumberOfDaysFilter() {
+    console.log('updateNumberOfDaysFilter', this.numberOfDays.value);
+    if (this.numberOfDays.valid) {
+      this.gerritService.updateDaysFilter(this.numberOfDays.value);
+    }
+  }
+
   ngOnInit(): void {
-    this.dataSource = new MatTableDataSource<ListOfProjectsEntry>(this.gerritService.getProjects());
+    this.previousNumberOfDays = this.numberOfDays.value;
+    this.dataSource = new MatTableDataSource<ListOfProjectsEntry>();
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
     this.subscriptions.push(this.selection.changed.asObservable().subscribe(value => {
-      // console.log('selection', value);
-      const projects = this.selection.selected.map(i => i.project);
-      // console.log('selection', projects);
-      this.gerritService.updateProjectsFilter(projects);
+      if (!this.scopeChangeOngoing) {
+        const projects = this.selection.selected.map(i => i.project);
+        this.gerritService.updateProjectsFilter(projects);
+      }
     }));
     this.subscriptions.push(this.gerritService.filter$.subscribe(value => {
       this.teams = this.masterDataService.getTeams(this.gerritService.getContributors());
+      if (this.previousNumberOfDays !== value.numberOfDays) {
+        this.scopeChangeOngoing = true;
+        this.previousNumberOfDays = value.numberOfDays;
+        this.dataSource.data = this.gerritService.getProjects();
+        const projects = this.selection.selected.map(i => i.project);
+        this.selection.clear();
+        this.dataSource.data.forEach(entry => {
+          if (projects.indexOf(entry.project) > -1) {
+            this.selection.select(entry);
+          }
+        });
+        this.scopeChangeOngoing = false;
+      }
     }));
+
+    this.gerritService.updateDaysFilter(this.numberOfDays.value);
   }
 
   ngOnDestroy(): void {

@@ -8,54 +8,74 @@
         Define the scope of all related charts
       </mat-panel-description>
     </mat-expansion-panel-header>
+
     <div class="projectFilter">
-      <mat-form-field class="filterInput">
-        <mat-label>Filter</mat-label>
-        <input (keyup)="applyFilter($event)" matInput placeholder="Filter...">
-      </mat-form-field>
-      <table [dataSource]="dataSource" mat-table matSort matSortActive="commits" matSortDirection="desc"
-             matSortDisableClear>
+      <div class="col1">
+        <mat-form-field class="days-full-width">
+          <mat-label>Number of days</mat-label>
+          <input matInput type="number" [formControl]="numberOfDays" maxlength="256"
+                 placeholder="365 for a year.. you get it">
+          <mat-hint align="start"><strong>Exceeding 365 days will lead to display problems on some charts</strong>
+          </mat-hint>
+          <mat-error *ngIf="numberOfDays.hasError('pattern') && !numberOfDays.hasError('required')">
+            Provide a number!
+          </mat-error>
+          <mat-error *ngIf="numberOfDays.hasError('required')">
+            Number of days is <strong>required</strong>
+          </mat-error>
+        </mat-form-field>
+        <button [disabled]="!this.numberOfDays.valid" mat-raised-button (click)="updateNumberOfDaysFilter()">Apply
+        </button>
+      </div>
+      <div class="col2">
+        <mat-form-field class="filterInput">
+          <mat-label>Project Filer</mat-label>
+          <input (keyup)="applyFilter($event)" matInput placeholder="Filter...">
+        </mat-form-field>
+        <table [dataSource]="dataSource" mat-table matSort matSortActive="commits" matSortDirection="desc"
+               matSortDisableClear>
 
-        <!-- Checkbox Column -->
-        <ng-container matColumnDef="select">
-          <th *matHeaderCellDef mat-header-cell>
-            <mat-checkbox (change)="$event ? masterToggle() : null"
-                          [aria-label]="checkboxLabel()"
-                          [checked]="selection.hasValue() && isAllSelected()"
-                          [indeterminate]="selection.hasValue() && !isAllSelected()">
-            </mat-checkbox>
-          </th>
-          <td *matCellDef="let row" mat-cell>
-            <mat-checkbox (change)="$event ? selection.toggle(row) : null"
-                          (click)="$event.stopPropagation()"
-                          [aria-label]="checkboxLabel(row)"
-                          [checked]="isRowSelected(row)">
-            </mat-checkbox>
-          </td>
-        </ng-container>
+          <!-- Checkbox Column -->
+          <ng-container matColumnDef="select">
+            <th *matHeaderCellDef mat-header-cell>
+              <mat-checkbox (change)="$event ? masterToggle() : null"
+                            [aria-label]="checkboxLabel()"
+                            [checked]="selection.hasValue() && isAllSelected()"
+                            [indeterminate]="selection.hasValue() && !isAllSelected()">
+              </mat-checkbox>
+            </th>
+            <td *matCellDef="let row" mat-cell>
+              <mat-checkbox (change)="$event ? selection.toggle(row) : null"
+                            (click)="$event.stopPropagation()"
+                            [aria-label]="checkboxLabel(row)"
+                            [checked]="isRowSelected(row)">
+              </mat-checkbox>
+            </td>
+          </ng-container>
 
-        <ng-container matColumnDef="project">
-          <th *matHeaderCellDef mat-header-cell mat-sort-header> Project</th>
-          <td *matCellDef="let element" mat-cell> {{element.project}} </td>
-        </ng-container>
+          <ng-container matColumnDef="project">
+            <th *matHeaderCellDef mat-header-cell mat-sort-header> Project</th>
+            <td *matCellDef="let element" mat-cell> {{element.project}} </td>
+          </ng-container>
 
-        <ng-container matColumnDef="commits">
-          <th *matHeaderCellDef mat-header-cell mat-sort-header> Commits</th>
-          <td *matCellDef="let element" mat-cell> {{element.commits}} </td>
-        </ng-container>
+          <ng-container matColumnDef="commits">
+            <th *matHeaderCellDef mat-header-cell mat-sort-header> Commits</th>
+            <td *matCellDef="let element" mat-cell> {{element.commits}} </td>
+          </ng-container>
 
-        <ng-container matColumnDef="contributors">
-          <th *matHeaderCellDef mat-header-cell mat-sort-header> Contributors</th>
-          <td *matCellDef="let element" mat-cell> {{element.contributors}} </td>
-        </ng-container>
+          <ng-container matColumnDef="contributors">
+            <th *matHeaderCellDef mat-header-cell mat-sort-header> Contributors</th>
+            <td *matCellDef="let element" mat-cell> {{element.contributors}} </td>
+          </ng-container>
 
-        <tr *matHeaderRowDef="displayedColumns" mat-header-row></tr>
-        <tr (click)="selection.toggle(row)" *matRowDef="let row; columns: displayedColumns;"
-            mat-row>
-        </tr>
-      </table>
+          <tr *matHeaderRowDef="displayedColumns" mat-header-row></tr>
+          <tr (click)="selection.toggle(row)" *matRowDef="let row; columns: displayedColumns;"
+              mat-row>
+          </tr>
+        </table>
 
-      <mat-paginator [pageSizeOptions]="[5, 10, 20, 50]" pageSize="10" showFirstLastButtons></mat-paginator>
+        <mat-paginator [pageSizeOptions]="[5, 10, 20, 50]" pageSize="10" showFirstLastButtons></mat-paginator>
+      </div>
     </div>
   </mat-expansion-panel>
 
