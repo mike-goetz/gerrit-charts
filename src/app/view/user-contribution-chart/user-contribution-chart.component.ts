@@ -15,6 +15,7 @@ import {GerritService} from '../../service/gerrit.service';
   styleUrls: ['./user-contribution-chart.component.scss']
 })
 export class UserContributionChartComponent implements AfterViewInit, OnDestroy {
+  @Input() selectedPersons: Person[];
   @Input() team: Team;
   @Input() person: Person;
   @ViewChild('matrixChart') matrixChart: ElementRef;
@@ -28,7 +29,7 @@ export class UserContributionChartComponent implements AfterViewInit, OnDestroy 
 
   ngAfterViewInit(): void {
     this.subscription = this.gerritService.filter$.subscribe((filter) => {
-      const analyticsData: GerritAnalyticsData = this.gerritService.getPersonData(this.person, this.team);
+      const analyticsData: GerritAnalyticsData = this.gerritService.getPersonData(this.person, this.team ? this.team.members : this.selectedPersons);
 
       let dataSet = {
         label: 'Contribution Data',

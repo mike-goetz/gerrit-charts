@@ -87,7 +87,7 @@ export class GerritService {
     return result;
   }
 
-  public getPersonData(person: Person, team: Team): GerritAnalyticsData {
+  public getPersonData(person: Person, persons: Person[]): GerritAnalyticsData {
     const map = new Map<string, ContributionChartDataPoint>();
     let dt = moment().subtract(this.filter.numberOfDays - 1, 'days').startOf('day');
     const end = moment().startOf('day');
@@ -104,7 +104,7 @@ export class GerritService {
     }
 
     const commitsFromTeam = gerritData.filter(item => {
-      return this.isWithinScope(item) && this.isTeamMember(item.owner.username, team);
+      return this.isWithinScope(item) && this.isMember(item.owner.username, persons);
     });
     const reviewsFromTeam = gerritData.filter(item => {
       const withinScope = this.isWithinScope(item);
@@ -113,9 +113,9 @@ export class GerritService {
       }
       const codeReviewer = item.labels['Code-Review'].approved;
       const codeReviewerUserName = codeReviewer ? codeReviewer.username : item.submitter.username;
-      return this.isTeamMember(codeReviewerUserName, team);
+      return this.isMember(codeReviewerUserName, persons);
     });
-    const teamSize = team.members.filter(m => m.endDate === undefined).length;
+    const teamSize = persons.length;
     const averageNumberOfCommitsPerTeamMember = Math.floor(commitsFromTeam.length / teamSize);
     const averageNumberOfReviewsPerTeamMember = Math.floor(reviewsFromTeam.length / teamSize);
 
@@ -323,6 +323,10 @@ export class GerritService {
   }
 
   private isTeamMember(username: string, team: Team): boolean {
-    return team.members.find(m => m.username === username) !== undefined;
+    return this.isMember(username, team.members);
+  }
+
+  private isMember(username: string, persons: Person[]): boolean {
+    return persons.find(m => m.username === username) !== undefined;
   }
 }

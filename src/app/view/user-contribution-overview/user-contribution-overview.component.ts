@@ -12,6 +12,7 @@ import {Person} from '../../model/person';
 export class UserContributionOverviewComponent implements AfterViewInit, OnDestroy {
   @Input() persons: Subject<Person[]> = new Subject<Person[]>();
   @ViewChild('userCommitChart') userCommitChart: ElementRef;
+  selectedPersons: Person[];
   private chart: Chart;
   private subscriptions: Subscription[] = [];
 
@@ -20,9 +21,11 @@ export class UserContributionOverviewComponent implements AfterViewInit, OnDestr
 
   ngAfterViewInit(): void {
     this.subscriptions.push(this.persons.subscribe(value => {
+      this.selectedPersons = [...value];
       this.buildChart(value);
     }));
     this.subscriptions.push(this.gerritService.filter$.subscribe(() => {
+      this.selectedPersons = [];
       this.buildChart();
     }));
   }

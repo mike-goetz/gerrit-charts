@@ -1,3 +1,4 @@
 <div>
   <canvas #userCommitChart></canvas>
+  <app-user-contribution-chart *ngFor="let person of selectedPersons;" [person]="person" [selectedPersons]="selectedPersons"></app-user-contribution-chart>
 </div>
